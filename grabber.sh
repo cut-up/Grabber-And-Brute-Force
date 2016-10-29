@@ -45,7 +45,8 @@ preview()
   done < "$2"
 }
 
-error() {
+error()
+{
   curl --socks5-hostname "$SOCKS5" --user-agent "$USER_AGENT" --cookie "$COOKIE" --location --progress-bar "$1" > "$TMPPREVIEW"
   if [ "$(stat -c %s "$TMPPREVIEW")" -lt 1024 ] ; then
     echo -en "\e[01;30m"$1"\e[00m"
