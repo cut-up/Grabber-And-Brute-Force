@@ -1,7 +1,7 @@
 #!/bin/bash
 LOGIN="./login.txt"
 TMPDIR="/tmp/grabber"
-PREVIEW="$TMPDIR/preview.tmp"
+TMPPREVIEW="$TMPDIR/preview.tmp"
 TMPFORUM="$TMPDIR/forum.tmp"
 TMPTHREAD="$TMPDIR/thread.tmp"
 SOCKS5="192.168.1.1:9100"
@@ -14,15 +14,15 @@ PAUSE="60"
 forum()
 {
   error "$1"
-  sed -n '/<a href="forums\/.\+\/" data-description="#nodeDescription-.\+">/p' "$PREVIEW" | cut -d '"' -f 4 | sed "s#^#$URL#" >> "$TMPFORUM"
-  sed -n '/<a href="forums\/.\+\/" class="menuRow">/p' "$PREVIEW" | cut -d '"' -f 4 | sed "s#^#$URL#" >> "$TMPFORUM"
+  sed -n '/<a href="forums\/.\+\/" data-description="#nodeDescription-.\+">/p' "$TMPPREVIEW" | cut -d '"' -f 4 | sed "s#^#$URL#" >> "$TMPFORUM"
+  sed -n '/<a href="forums\/.\+\/" class="menuRow">/p' "$TMPPREVIEW" | cut -d '"' -f 4 | sed "s#^#$URL#" >> "$TMPFORUM"
   echo -e "\e[01;32m"$1" - "$(wc -l "$TMPFORUM" | cut -d " " -f 1)"\e[00m"
 }
 
 thread()
 {
   error "$1"
-  sed -n '/data-previewUrl=".\+\/preview"/p' "$PREVIEW" | cut -d '"' -f 2 | sed 's/preview$//' | sed "s#^#$URL#" >> "$TMPTHREAD"
+  sed -n '/data-previewUrl=".\+\/preview"/p' "$TMPPREVIEW" | cut -d '"' -f 2 | sed 's/preview$//' | sed "s#^#$URL#" >> "$TMPTHREAD"
   echo -e "\e[01;32m"$1" ("$2")\e[00m"
 }
 
@@ -30,7 +30,7 @@ login()
 {
   error "$1"
   # reputation 10+ (.\+.\+)
-  sed -n '/<span style="color: green; font-weight: bold;text-decoration: none; float:right; padding: 0 3px 0 1px;">.\+.\+<\/span>/,/<div class="topic-nickname">/p' "$PREVIEW" | sed -n '/<div class=\"topic-nickname\">/p' | sed 's/^.*<div class="topic-nickname"><a href="users\/.*\/" class="username" dir="auto" itemprop="name">//' | sed 's/^<span class="style[0-9]\+">//' | sed 's/<\/a>.*$//' | sed 's/<\/span>.*$//' >> "$LOGIN"
+  sed -n '/<span style="color: green; font-weight: bold;text-decoration: none; float:right; padding: 0 3px 0 1px;">.\+.\+<\/span>/,/<div class="topic-nickname">/p' "$TMPPREVIEW" | sed -n '/<div class=\"topic-nickname\">/p' | sed 's/^.*<div class="topic-nickname"><a href="users\/.*\/" class="username" dir="auto" itemprop="name">//' | sed 's/^<span class="style[0-9]\+">//' | sed 's/<\/a>.*$//' | sed 's/<\/span>.*$//' >> "$LOGIN"
   echo -e "\e[01;32m"$1" ("$2")\e[00m"
 }
 
@@ -46,8 +46,8 @@ preview()
 }
 
 error() {
-  curl --socks5-hostname "$SOCKS5" --user-agent "$USER_AGENT" --cookie "$COOKIE" --location --progress-bar "$1" > "$PREVIEW"
-  if [ "$(stat -c %s "$PREVIEW")" -lt 1024 ] ; then
+  curl --socks5-hostname "$SOCKS5" --user-agent "$USER_AGENT" --cookie "$COOKIE" --location --progress-bar "$1" > "$TMPPREVIEW"
+  if [ "$(stat -c %s "$TMPPREVIEW")" -lt 1024 ] ; then
     echo -en "\e[01;30m"$1"\e[00m"
     for (( i=0; i<"$PAUSE"; i++ )) ; do
       if [ "$i" == "$(echo $(( $PAUSE - 1 )))" ] ; then
